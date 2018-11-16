@@ -318,7 +318,7 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     OPTLYAndCondition *andCondition = conditions[0];
     XCTAssertTrue(andCondition.subConditions.count == 1);
     XCTAssertTrue([andCondition.subConditions[0] isKindOfClass:[OPTLYBaseCondition class]]);
-    OPTLYBaseCondition *condition = andCondition.subConditions[0];
+    OPTLYBaseCondition *condition = (OPTLYBaseCondition *)andCondition.subConditions[0];
     XCTAssertEqualObjects(condition.name, @"someAttributeKey");
     XCTAssertEqualObjects(condition.value, @"attributeValue");
     XCTAssertEqualObjects(condition.type, @"custom_attribute");
@@ -336,7 +336,7 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     OPTLYAndCondition *andCondition = conditions[0];
     XCTAssertTrue(andCondition.subConditions.count == 1);
     XCTAssertTrue([andCondition.subConditions[0] isKindOfClass:[OPTLYBaseCondition class]]);
-    OPTLYBaseCondition *condition = andCondition.subConditions[0];
+    OPTLYBaseCondition *condition = (OPTLYBaseCondition *)andCondition.subConditions[0];
     XCTAssertEqualObjects(condition.name, @"someAttributeKey");
     XCTAssertEqualObjects(condition.value, @"attributeValue");
     XCTAssertEqualObjects(condition.type, @"custom_attribute");
@@ -354,13 +354,13 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     XCTAssertTrue([conditionsArray[0] isKindOfClass:[OPTLYAndCondition class]]);
     OPTLYAndCondition *andCondition = conditionsArray[0];
     XCTAssertTrue([andCondition.subConditions[0] isKindOfClass:[OPTLYOrCondition class]]);
-    OPTLYOrCondition *orCondition = andCondition.subConditions[0];
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)andCondition.subConditions[0];
     XCTAssertTrue([orCondition.subConditions[0] isKindOfClass:[OPTLYOrCondition class]]);
     XCTAssertTrue(orCondition.subConditions.count == 1);
-    orCondition = orCondition.subConditions[0];
+    orCondition = (OPTLYOrCondition *)orCondition.subConditions[0];
     XCTAssertTrue(orCondition.subConditions.count == 1);
     XCTAssertTrue([orCondition.subConditions[0] isKindOfClass:[OPTLYBaseCondition class]]);
-    OPTLYBaseCondition *baseCondition = orCondition.subConditions[0];
+    OPTLYBaseCondition *baseCondition = (OPTLYBaseCondition *)orCondition.subConditions[0];
     XCTAssertTrue([baseCondition.name isEqualToString:@"browser_type"]);
     XCTAssertTrue([baseCondition.type isEqualToString:@"custom_attribute"]);
     XCTAssertTrue([baseCondition.value isEqual:@"chrome"]);

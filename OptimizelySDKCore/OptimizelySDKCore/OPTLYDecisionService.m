@@ -480,18 +480,26 @@
              experiment:(OPTLYExperiment *)experiment
                 attributes:(NSDictionary<NSString *, NSObject *> *)attributes
 {
-    NSArray *audiences = experiment.audienceIds;
-    
-    // if there are no audiences, ALL users should be part of the experiment
-    if ([audiences count] == 0) {
-        return true;
-    }
-    
     // if there are audiences, but no user attributes, Defaults to empty attributes
     if (attributes == nil) {
         attributes = @{};
     }
     
+    // if there are audience conditions, evaluate them, else evaluate audience Ids
+    if (experiment.audienceConditions != nil) {
+        BOOL areAttributesValid = [[experiment evaluateConditionsWithAttributes:attributes] boolValue];
+        if (areAttributesValid) {
+            return areAttributesValid;
+        }
+        return false;
+    }
+    
+    NSArray *audiences = experiment.audienceIds;
+    // if there are no audiences, ALL users should be part of the experiment
+    if ([audiences count] == 0) {
+        return true;
+    }
+
     for (NSString *audienceId in audiences) {
         OPTLYAudience *audience = [config getAudienceForId:audienceId];
         BOOL areAttributesValid = [[audience evaluateConditionsWithAttributes:attributes] boolValue];

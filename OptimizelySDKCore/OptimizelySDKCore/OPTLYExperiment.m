@@ -34,9 +34,41 @@ NSString * const OPTLYExperimentStatusRunning = @"Running";
 + (OPTLYJSONKeyMapper*)keyMapper
 {
     return [[OPTLYJSONKeyMapper alloc] initWithDictionary:@{ OPTLYDatafileKeysExperimentId   : @"experimentId",
-                                                        OPTLYDatafileKeysExperimentKey  : @"experimentKey",
-                                                        OPTLYDatafileKeysExperimentTrafficAllocation : @"trafficAllocations"
-                                                        }];
+                                                             OPTLYDatafileKeysExperimentKey  : @"experimentKey",
+                                                             OPTLYDatafileKeysExperimentTrafficAllocation : @"trafficAllocations"
+                                                             }];
+}
+
+- (void)setAudienceConditionsWithNSString:(NSString *)string {
+    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *err = nil;
+    NSArray *array = [NSJSONSerialization JSONObjectWithData:data
+                                                     options:NSJSONReadingAllowFragments
+                                                       error:&err];
+    if (err != nil) {
+        NSException *exception = [[NSException alloc] initWithName:err.domain reason:err.localizedFailureReason userInfo:@{@"Error" : err}];
+        @throw exception;
+    }
+    
+    self.audienceConditions = [OPTLYCondition deserializeAudienceConditionsJSONArray:array error:&err];
+    
+    if (err != nil) {
+        NSException *exception = [[NSException alloc] initWithName:err.domain reason:err.localizedFailureReason userInfo:@{@"Error" : err}];
+        @throw exception;
+    }
+}
+
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes {
+    for (NSObject<OPTLYCondition> *condition in self.audienceConditions) {
+        NSNumber *result = [condition evaluateConditionsWithAttributes:attributes];
+        if (result != NULL && [result boolValue] == true) {
+            // if user satisfies any conditions, return true.
+            return [NSNumber numberWithBool:true];
+        }
+    }
+    // if user doesn't satisfy any conditions, return false.
+    return [NSNumber numberWithBool:false];
 }
 
 - (void)setGroupId:(NSString *)groupId {

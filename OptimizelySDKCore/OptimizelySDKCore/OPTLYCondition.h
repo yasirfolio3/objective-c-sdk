@@ -29,7 +29,10 @@
 
 + (NSArray<OPTLYCondition *><OPTLYCondition> *)deserializeJSONArray:(NSArray *)jsonArray
                                             error:(NSError * __autoreleasing *)error;
-+ (NSArray<OPTLYCondition *><OPTLYCondition> *)deserializeJSONArray:(NSArray *)jsonArray;
++ (NSArray<OPTLYCondition> *)deserializeJSONArray:(NSArray *)jsonArray;
++ (NSArray<OPTLYCondition> *)deserializeAudienceConditionsJSONArray:(NSArray *)jsonArray
+                                            error:(NSError * __autoreleasing *)error;
++ (NSArray<OPTLYCondition> *)deserializeAudienceConditionsJSONArray:(NSArray *)jsonArray;
 
 @end
 

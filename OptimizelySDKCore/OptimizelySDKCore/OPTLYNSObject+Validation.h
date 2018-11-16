@@ -48,6 +48,20 @@ NS_ASSUME_NONNULL_BEGIN
  **/
 - (NSString *)getStringOrEmpty;
 
+/**
+ * Returns if object is of numeric type
+ *
+ * @returns A bool for whether object is valid numeric type.
+ **/
+- (BOOL)isNumeric;
+
+/**
+ * Returns if object is of boolean type
+ *
+ * @returns A bool for whether object is valid boolean type.
+ **/
+- (BOOL)isBool;
+
 @end
 
 NS_ASSUME_NONNULL_END
