@@ -193,7 +193,7 @@
 
 @implementation OPTLYAndCondition
 
-- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes{
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     // According to the matrix:
     // false and true is false
     // false and null is false
@@ -205,7 +205,7 @@
     for (NSObject<OPTLYCondition> *condition in self.subConditions) {
         // if any of our sub conditions are false or null
         NSNumber * result = [NSNumber new];
-        result = [condition evaluateConditionsWithAttributes:attributes];
+        result = [condition evaluateConditionsWithAttributes:attributes projectConfig:config];
         
         if (result == NULL) {
             foundNull = true;
@@ -228,7 +228,7 @@
 
 @implementation OPTLYOrCondition
 
-- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes {
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     // According to the matrix:
     // true returns true
     // false or null is null
@@ -237,7 +237,7 @@
     BOOL foundNull = false;
     for (NSObject<OPTLYCondition> *condition in self.subConditions) {
         NSNumber * result = [NSNumber new];
-        result = [condition evaluateConditionsWithAttributes:attributes];
+        result = [condition evaluateConditionsWithAttributes:attributes projectConfig:config];
         if (result == NULL) {
             foundNull = true;
         }
@@ -260,10 +260,10 @@
 
 @implementation OPTLYNotCondition
 
-- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes {
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     // return the negative of the subcondition
     NSNumber * result = [NSNumber new];
-    result = [self.subCondition evaluateConditionsWithAttributes:attributes];
+    result = [self.subCondition evaluateConditionsWithAttributes:attributes projectConfig:config];
     if (result == NULL) {
         return NULL;
     }

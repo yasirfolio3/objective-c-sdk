@@ -44,7 +44,7 @@
     }
 }
 
-- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes {
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     if (attributes == nil) {
         // if the user did not pass in attributes, return false
         return [NSNumber numberWithBool:false];

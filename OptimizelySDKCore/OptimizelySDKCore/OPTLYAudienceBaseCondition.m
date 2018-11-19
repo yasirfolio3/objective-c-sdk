@@ -15,6 +15,7 @@
  ***************************************************************************/
 
 #import "OPTLYAudienceBaseCondition.h"
+#import "OPTLYAudience.h"
 
 @implementation OPTLYAudienceBaseCondition
 
@@ -22,11 +23,18 @@
     return [jsonData isKindOfClass:[NSString class]];
 }
 
-- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes {
+- (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     if (attributes == nil) {
         // if the user did not pass in attributes, return false
         return [NSNumber numberWithBool:false];
     }
+    
+    OPTLYAudience *audience = [config getAudienceForId:self.audienceId];
+    BOOL areAttributesValid = [[audience evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
+    if (areAttributesValid) {
+        return [NSNumber numberWithBool:true];;
+    }
+    
     return [NSNumber numberWithBool:false];
 }
 

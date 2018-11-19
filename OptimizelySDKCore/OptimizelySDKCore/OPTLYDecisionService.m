@@ -487,7 +487,7 @@
     
     // if there are audience conditions, evaluate them, else evaluate audience Ids
     if (experiment.audienceConditions != nil) {
-        BOOL areAttributesValid = [[experiment evaluateConditionsWithAttributes:attributes] boolValue];
+        BOOL areAttributesValid = [[experiment evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
         if (areAttributesValid) {
             return areAttributesValid;
         }
@@ -502,7 +502,7 @@
 
     for (NSString *audienceId in audiences) {
         OPTLYAudience *audience = [config getAudienceForId:audienceId];
-        BOOL areAttributesValid = [[audience evaluateConditionsWithAttributes:attributes] boolValue];
+        BOOL areAttributesValid = [[audience evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
         if (areAttributesValid) {
             return true;
         }

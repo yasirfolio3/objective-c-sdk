@@ -50,7 +50,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"location" : @"San Francisco",
                                              @"browser" : @"Chrome"};
     
-    XCTAssertTrue([[audience evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertTrue([[audience evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testEvaluateConditionsDoNotMatch {
@@ -63,7 +63,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"location" : @"San Francisco",
                                              @"browser" : @"Firefox"};
     
-    XCTAssertFalse([[audience evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertFalse([[audience evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testEvaluateEmptyUserAttributes {
@@ -74,7 +74,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     XCTAssertNotNil(audience);
     NSDictionary *attributesPassOrValue = @{};
     
-    XCTAssertFalse([[audience evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertFalse([[audience evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testEvaluateNullUserAttributes {
@@ -83,7 +83,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                                                           @"conditions" : kAudienceConditions}
                                                                   error:nil];
     XCTAssertNotNil(audience);
-    XCTAssertFalse([[audience evaluateConditionsWithAttributes:NULL] boolValue]);
+    XCTAssertFalse([[audience evaluateConditionsWithAttributes:NULL projectConfig:nil] boolValue]);
 }
 
 - (void)testTypedUserAttributesEvaluateTrue {
@@ -97,7 +97,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"num_users" : @15,
                                              @"pi_value" : @3.14,
                                              @"decimal_value": @3.15678};
-    XCTAssertTrue([[audience evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertTrue([[audience evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testEvaluateTrueWhenNoUserAttributesAndConditionEvaluatesTrue {
@@ -108,7 +108,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                                                           @"conditions" : conditions}
                                                                   error:nil];
     XCTAssertNotNil(audience);
-    XCTAssertTrue([[audience evaluateConditionsWithAttributes:NULL] boolValue]);
+    XCTAssertTrue([[audience evaluateConditionsWithAttributes:NULL projectConfig:nil] boolValue]);
 }
 
 
@@ -121,7 +121,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"match": @"exact"};
     NSDictionary *attributesPassOrValue2 = @{@"device_type" : @"iPhone"};
     OPTLYBaseCondition *condition = [[OPTLYBaseCondition alloc] initWithDictionary:attributesPassOrValue1 error:nil];
-    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
 }
 
 - (void)testEvaluateReturnsNullWithInvalidMatchType {
@@ -131,7 +131,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"match": @"invalid"};
     NSDictionary *attributesPassOrValue2 = @{@"device_type" : @"iPhone"};
     OPTLYBaseCondition *condition = [[OPTLYBaseCondition alloc] initWithDictionary:attributesPassOrValue1 error:nil];
-    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
 }
 
 - (void)testEvaluateReturnsNullWithInvalidValueForMatchType {
@@ -141,7 +141,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
                                              @"match": @"substring"};
     NSDictionary *attributesPassOrValue2 = @{@"is_firefox" : @false};
     OPTLYBaseCondition *condition = [[OPTLYBaseCondition alloc] initWithDictionary:attributesPassOrValue1 error:nil];
-    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([condition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
 }
 
 ///MARK:- ExactMatcher Tests
@@ -150,13 +150,13 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue = @{};
     
     OPTLYAndCondition *andCondition1 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchStringType];
-    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
     OPTLYAndCondition *andCondition2 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchBoolType];
-    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
     OPTLYAndCondition *andCondition3 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchDecimalType];
-    XCTAssertNil([andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
     OPTLYAndCondition *andCondition4 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertNil([andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
 - (void)testExactMatcherReturnsFalseWhenAttributeValueDoesNotMatch {
@@ -166,13 +166,13 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue4 = @{@"attr_value" : @55};
     
     OPTLYAndCondition *andCondition1 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchStringType];
-    XCTAssertFalse([[andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
+    XCTAssertFalse([[andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition2 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchBoolType];
-    XCTAssertFalse([[andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertFalse([[andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition3 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchDecimalType];
-    XCTAssertFalse([[andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3] boolValue]);
+    XCTAssertFalse([[andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition4 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertFalse([[andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4] boolValue]);
+    XCTAssertFalse([[andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4 projectConfig:nil] boolValue]);
 }
 
 - (void)testExactMatcherReturnsNullWhenTypeMismatch {
@@ -183,14 +183,14 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue5 = @{};
     
     OPTLYAndCondition *andCondition1 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchStringType];
-    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1]);
-    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue5]);
+    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil]);
+    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue5 projectConfig:nil]);
     OPTLYAndCondition *andCondition2 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchBoolType];
-    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
     OPTLYAndCondition *andCondition3 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchDecimalType];
-    XCTAssertNil([andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3]);
+    XCTAssertNil([andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil]);
     OPTLYAndCondition *andCondition4 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertNil([andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4]);
+    XCTAssertNil([andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4 projectConfig:nil]);
 }
 
 - (void)testExactMatcherReturnsNullWithNumericInfinity {
@@ -198,9 +198,9 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{@"attr_value" : @15}; // Infinity condition
     
     OPTLYAndCondition *andCondition1 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1]);
+    XCTAssertNil([andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil]);
     OPTLYAndCondition *andCondition2 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kInfinityIntConditionStr];
-    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
 }
 
 - (void)testExactMatcherReturnsTrueWhenAttributeValueMatches {
@@ -211,15 +211,15 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue5 = @{@"attr_value" : @10.0};
     
     OPTLYAndCondition *andCondition1 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchStringType];
-    XCTAssertTrue([[andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
+    XCTAssertTrue([[andCondition1 evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition2 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchBoolType];
-    XCTAssertTrue([[andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertTrue([[andCondition2 evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition3 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchDecimalType];
-    XCTAssertTrue([[andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3] boolValue]);
+    XCTAssertTrue([[andCondition3 evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition4 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertTrue([[andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4] boolValue]);
+    XCTAssertTrue([[andCondition4 evaluateConditionsWithAttributes:attributesPassOrValue4 projectConfig:nil] boolValue]);
     OPTLYAndCondition *andCondition5 = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExactMatchIntType];
-    XCTAssertTrue([[andCondition5 evaluateConditionsWithAttributes:attributesPassOrValue5] boolValue]);
+    XCTAssertTrue([[andCondition5 evaluateConditionsWithAttributes:attributesPassOrValue5 projectConfig:nil] boolValue]);
 }
 
 ///MARK:- ExistsMatcher Tests
@@ -227,13 +227,13 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
 - (void)testExistsMatcherReturnsFalseWhenAttributeIsNotProvided {
     NSDictionary *attributesPassOrValue = @{};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExistsMatchType];
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testExistsMatcherReturnsFalseWhenAttributeIsNull {
     NSDictionary *attributesPassOrValue = @{@"attr_value" : [NSNull null]};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExistsMatchType];
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testExistsMatcherReturnsTrueWhenAttributeValueIsProvided {
@@ -244,11 +244,11 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue5 = @{@"attr_value" : @false};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithExistsMatchType];
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue3] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue4] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue5] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue4 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue5 projectConfig:nil] boolValue]);
 }
 
 ///MARK:- SubstringMatcher Tests
@@ -256,7 +256,7 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
 - (void)testSubstringMatcherReturnsFalseWhenConditionValueIsNotSubstringOfUserValue {
     NSDictionary *attributesPassOrValue = @{@"attr_value":@"Breaking news!"};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithSubstringMatchType];
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testSubstringMatcherReturnsTrueWhenConditionValueIsSubstringOfUserValue {
@@ -264,8 +264,8 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{@"attr_value" : @"chrome vs firefox"};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithSubstringMatchType];
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
 }
 
 - (void)testSubstringMatcherReturnsNullWhenAttributeValueIsNotAString {
@@ -274,15 +274,15 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue3 = @{};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithSubstringMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue3]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil]);
 }
 
 - (void)testSubstringMatcherReturnsNullWhenAttributeIsNotProvided{
     NSDictionary *attributesPassOrValue = @{};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithSubstringMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
 ///MARK:- GTMatcher Tests
@@ -293,9 +293,9 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue3 = @{@"attr_value" : @10.0};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithGreaterThanMatchType];
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue3] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil] boolValue]);
 }
 
 - (void)testGTMatcherReturnsNullWhenAttributeValueIsNotANumericValue {
@@ -305,16 +305,16 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue4 = @{@"attr_value" : @false};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithGreaterThanMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue3]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue4]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue3 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue4 projectConfig:nil]);
 }
 
 - (void)testGTMatcherReturnsNullWhenAttributeValueIsInfinity {
     NSDictionary *attributesPassOrValue = @{@"attr_value" : [NSNumber numberWithFloat:INFINITY]};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithGreaterThanMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
 - (void)testGTMatcherReturnsTrueWhenAttributeValueIsGreaterThanConditionValue {
@@ -322,8 +322,8 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{@"attr_value" : @10.1};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithGreaterThanMatchType];
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
 }
 
 ///MARK:- LTMatcher Tests
@@ -333,8 +333,8 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{@"attr_value" : @10};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithLessThanMatchType];
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
 }
 
 - (void)testLTMatcherReturnsNullWhenAttributeValueIsNotANumericValue {
@@ -342,14 +342,14 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithLessThanMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1]);
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil]);
 }
 
 - (void)testLTMatcherReturnsNullWhenAttributeValueIsInfinity {
     NSDictionary *attributesPassOrValue = @{@"attr_value" : [NSNumber numberWithFloat:INFINITY]};
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithLessThanMatchType];
-    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue]);
+    XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
 - (void)testLTMatcherReturnsTrueWhenAttributeValueIsLessThanConditionValue {
@@ -357,8 +357,8 @@ static NSString * const kInfinityIntConditionStr = @"[\"and\", [\"or\", [\"or\",
     NSDictionary *attributesPassOrValue2 = @{@"attr_value" : @9.9};
     
     OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithLessThanMatchType];
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1] boolValue]);
-    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue1 projectConfig:nil] boolValue]);
+    XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue2 projectConfig:nil] boolValue]);
 }
 
 ///MARK:- Helper Methods
