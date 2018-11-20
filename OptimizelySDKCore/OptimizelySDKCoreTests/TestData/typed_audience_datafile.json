@@ -243,6 +243,11 @@
         "id": "3468206643",
         "name": "$$dummyExactBoolean",
         "conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
+    },
+    {
+        "id": "0",
+        "name": "$$dummy",
+        "conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
     }
     ],
     "typedAudiences": [{
@@ -302,6 +307,14 @@
         "experimentIds": [
             "11564051718",
             "1323241597"
+        ]
+    },
+    {
+        "key": "user_signed_up",
+        "id": "594090",
+        "experimentIds": [
+            "1323241598",
+            "1323241599"
         ]
     }],
     "revision": "3"
