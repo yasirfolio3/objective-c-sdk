@@ -25,10 +25,6 @@
 #import "OPTLYErrorHandler.h"
 #import "OPTLYLogger.h"
 
-static NSString * const kAudienceConditionsWithNot = @"[\"not\", [\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\", \"match\": \"exact\"}]]]";
-static NSString * const kAudienceConditionsWithAnd = @"[\"and\",[\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\", \"match\": \"substring\"}]],[\"or\", [\"or\", {\"name\": \"num_users\", \"type\": \"custom_attribute\", \"value\": 15, \"match\": \"exact\"}]],[\"or\", [\"or\", {\"name\": \"decimal_value\", \"type\": \"custom_attribute\", \"value\": 3.14, \"match\": \"gt\"}]]]";
-static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\", \"match\": \"substring\"}]],[\"or\", [\"or\", {\"name\": \"num_users\", \"type\": \"custom_attribute\", \"value\": 15, \"match\": \"exact\"}]],[\"or\", [\"or\", {\"name\": \"decimal_value\", \"type\": \"custom_attribute\", \"value\": 3.14, \"match\": \"gt\"}]]]";
-
 @interface OPTLYConditionTest : XCTestCase
 
 @property NSDictionary<NSString *, NSObject *> *testUserAttributes;
@@ -57,6 +53,33 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     [super tearDown];
     self.typedAudienceDatafile = nil;
     self.optimizelyTypedAudience = nil;
+}
+
+- (NSArray *)kAudienceConditionsWithNot {
+    static NSArray *_kAudienceConditionsWithNot;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _kAudienceConditionsWithNot = @[@"not",@[@"or", @[@"or", @{@"name": @"device_type", @"type": @"custom_attribute", @"value": @"iPhone", @"match": @"exact"}]]];
+    });
+    return _kAudienceConditionsWithNot;
+}
+
+- (NSArray *)kAudienceConditionsWithAnd {
+    static NSArray *_kAudienceConditionsWithAnd;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _kAudienceConditionsWithAnd = @[@"and",@[@"or", @[@"or", @{@"name": @"device_type", @"type": @"custom_attribute", @"value": @"iPhone", @"match": @"substring"}]],@[@"or", @[@"or", @{@"name": @"num_users", @"type": @"custom_attribute", @"value": @15, @"match": @"exact"}]],@[@"or", @[@"or", @{@"name": @"decimal_value", @"type": @"custom_attribute", @"value": @3.14, @"match": @"gt"}]]];
+    });
+    return _kAudienceConditionsWithAnd;
+}
+
+- (NSArray *)kAudienceConditionsWithOr {
+    static NSArray *_kAudienceConditionsWithOr;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _kAudienceConditionsWithOr = @[@"or",@[@"or", @[@"or", @{@"name": @"device_type", @"type": @"custom_attribute", @"value": @"iPhone", @"match": @"substring"}]],@[@"or", @[@"or", @{@"name": @"num_users", @"type": @"custom_attribute", @"value": @15, @"match": @"exact"}]],@[@"or", @[@"or", @{@"name": @"decimal_value", @"type": @"custom_attribute", @"value": @3.14, @"match": @"gt"}]]];
+    });
+    return _kAudienceConditionsWithOr;
 }
 
 - (void)testEvaluateReturnsTrueOnMatchingUserAttribute {
@@ -88,19 +111,19 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
 
 - (void)testNotEvaluatorReturnsNullWhenOperandEvaluateToNull {
     NSDictionary *attributesPassOrValue = @{@"device_type" : @123};
-    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithNot];
+    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithNot]];
     XCTAssertNil([notCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
 - (void)testNotEvaluatorReturnsTrueWhenOperandEvaluateToFalse {
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"Android"};
-    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithNot];
+    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithNot]];
     XCTAssertTrue([[notCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
 - (void)testNotEvaluatorReturnsFalseWhenOperandEvaluateToTrue {
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"iPhone"};
-    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithNot];
+    OPTLYNotCondition *notCondition = (OPTLYNotCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithNot]];
     XCTAssertFalse([[notCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -158,7 +181,7 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @15,
                                             @"num_users" : @"test",
                                             @"decimal_value": @false};
-    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithOr];
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithOr]];
     XCTAssertNil([orCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
@@ -166,7 +189,7 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"hone",
                                             @"num_users" : @15,
                                             @"decimal_value": @false};
-    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithOr];
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithOr]];
     XCTAssertTrue([[orCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -174,7 +197,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"Android",
                                             @"num_users" : @20,
                                             @"decimal_value": @false};
-    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithOr];
+
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithOr]];
     XCTAssertNil([orCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
@@ -182,7 +206,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"iPhone file explorer",
                                             @"num_users" : @20,
                                             @"decimal_value": @false};
-    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithOr];
+
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithOr]];
     XCTAssertTrue([[orCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -191,7 +216,7 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"Android",
                                             @"num_users" : @17,
                                             @"decimal_value": @3.12};
-    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithOr];
+    OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithOr]];
     XCTAssertFalse([[orCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -281,7 +306,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @15,
                                             @"num_users" : @"test",
                                             @"decimal_value": @false};
-    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithAnd];
+
+    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithAnd]];
     XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
@@ -289,7 +315,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"my iPhone",
                                             @"num_users" : @15,
                                             @"decimal_value": @false}; // This evaluates to null.
-    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithAnd];
+
+    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithAnd]];
     XCTAssertNil([andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil]);
 }
 
@@ -297,7 +324,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"Android", // Evaluates to false.
                                             @"num_users" : @20, // Evaluates to false.
                                             @"decimal_value": @false}; // Evaluates to null.
-    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithAnd];
+
+    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithAnd]];
     XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -305,7 +333,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"Phone", // Evaluates to true.
                                             @"num_users" : @20, // Evaluates to false.
                                             @"decimal_value": @false}; // Evaluates to null.
-    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithAnd];
+
+    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithAnd]];
     XCTAssertFalse([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -313,7 +342,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
     NSDictionary *attributesPassOrValue = @{@"device_type" : @"iPhone X",
                                             @"num_users" : @15,
                                             @"decimal_value": @3.1567};
-    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromJSONString:kAudienceConditionsWithAnd];
+
+    OPTLYAndCondition *andCondition = (OPTLYAndCondition *)[self getFirstConditionFromArray:[self kAudienceConditionsWithAnd]];
     XCTAssertTrue([[andCondition evaluateConditionsWithAttributes:attributesPassOrValue projectConfig:nil] boolValue]);
 }
 
@@ -614,12 +644,8 @@ static NSString * const kAudienceConditionsWithOr = @"[\"or\",[\"or\", [\"or\", 
 
 ///MARK:- Helper Methods
 
--(OPTLYCondition *)getFirstConditionFromJSONString:(NSString *)jsonString{
-    NSData *conditionData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
-    NSArray *conditionArray = [OPTLYCondition deserializeJSONArray:conditionStringJSONArray];
+- (OPTLYCondition *)getFirstConditionFromArray:(NSArray *)array {
+    NSArray *conditionArray = [OPTLYCondition deserializeJSONArray:array];
     return conditionArray[0];
 }
 
