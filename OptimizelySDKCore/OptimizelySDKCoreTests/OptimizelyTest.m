@@ -1198,9 +1198,10 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     XCTAssertEqualObjects(features, enabledFeatures);
 }
 
-#pragma mark - TypeAudiences Tests
+#pragma mark - TypedAudiences Tests
 
-- (void)testActivateWithTypeAudiences {
+- (void)testActivateWithTypedAudiencesWithExactMatchType {
+    // Should be included via exact match string audience with id '3468206642'
     NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
                                                                  @"house": @"Gryffindor"
                                                                  };
@@ -1212,9 +1213,96 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     [expectation fulfill];
     
     [self waitForExpectationsWithTimeout:2 handler:nil];
+    
+    // Should be included via exact match number audience with id '3468206646'
+    expectedAttributes = @{
+                           @"lasers": @45.5
+                           };
+    expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
+    
+    // Should be included via exact match bool audience with id '3468206643'
+    expectedAttributes = @{
+                           @"should_do_it": @YES
+                           };
+    expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
 }
 
-- (void)testActivateExcludeUserFromExperimentWithTypeAudiences {
+- (void)testActivateWithTypedAudiencesWithSubstringMatchType {
+    // Should be included via substring match string audience with id '3988293898'
+    NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
+                           @"house": @"222Slytherin"
+                           };
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    OPTLYVariation *variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+- (void)testActivateWithTypedAudiencesWithExistsMatchType {
+    // Should be included via exists match string audience with id '3988293899'
+    NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
+                           @"favorite_ice_cream": @1
+                           };
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    OPTLYVariation *variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+- (void)testActivateWithTypedAudiencesWithLtMatchType {
+    // Should be included via lt match number audience with id '3468206644'
+    NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
+                           @"lasers": @0.8
+                           };
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    OPTLYVariation *variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+- (void)testActivateWithTypedAudiencesWithGtMatchType {
+    // Should be included via gt match number audience with id '3468206647'
+    NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
+                           @"lasers": @71
+                           };
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"getActivatedVariation"];
+    
+    OPTLYVariation *variation = [self.optimizelyTypedAudience activate:@"typed_audience_experiment" userId:@"user1" attributes:expectedAttributes callback:^(NSError *error) {
+    }];
+    XCTAssertEqualObjects(@"A", variation.variationKey);
+    [expectation fulfill];
+    
+    [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+
+- (void)testActivateExcludesUserFromExperimentWithTypedAudiences {
     NSDictionary<NSString *, NSObject *> *expectedAttributes = @{
                                                                  @"house": @"Hufflepuff"
                                                                  };
@@ -1228,7 +1316,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     [self waitForExpectationsWithTimeout:2 handler:nil];
 }
 
-- (void)testTrackWithTypeAudiences {
+- (void)testTrackWithTypedAudiences {
     NSString *eventId = @"item_bought";
     NSString *userId = @"user1";
     NSDictionary<NSString *, NSObject *> *attributes = @{
@@ -1247,7 +1335,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     [loggerMock stopMocking];
 }
 
-- (void)testTrackExcludeUserFromExperimentWithTypeAudiences {
+- (void)testTrackExcludesUserFromExperimentWithTypedAudiences {
     NSString *eventId = @"item_bought";
     NSString *userId = @"user1";
     NSDictionary<NSString *, NSObject *> *attributes = @{
@@ -1279,7 +1367,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     XCTAssertTrue([self.optimizelyTypedAudience isFeatureEnabled:featureFlagKey userId:userId attributes:attributes]);
 }
 
-- (void)testIsFeatureEnabledExcludeUserFromExperimentWithTypedAudiences {
+- (void)testIsFeatureEnabledExcludesUserFromExperimentWithTypedAudiences {
     NSString *featureFlagKey = @"feat";
     NSString *userId = @"user1";
     NSDictionary<NSString *, NSObject *> *attributes = @{
@@ -1287,7 +1375,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     XCTAssertFalse([self.optimizelyTypedAudience isFeatureEnabled:featureFlagKey userId:userId attributes:attributes]);
 }
 
-- (void)testGetFeatureVariableStringReturnVariableValueWithTypedAudiences {
+- (void)testGetFeatureVariableStringReturnsVariableValueWithTypedAudiences {
     NSString *featureKey = @"feat_with_var";
     NSString *variableKey = @"x";
     NSString *userId = @"user1";
@@ -1298,13 +1386,13 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     XCTAssertEqualObjects(featureVariable, @"xyz");
     
     attributes = @{
-                   @"should_do_it": @true
+                   @"should_do_it": @YES
                    };
     featureVariable = [self.optimizelyTypedAudience getFeatureVariableValueForType:FeatureVariableTypeString featureKey:featureKey variableKey:variableKey userId:userId attributes:attributes];
     XCTAssertEqualObjects(featureVariable, @"xyz");
 }
 
-- (void)testGetFeatureVariableStringReturnDefaultVariableValueWithTypedAudiences {
+- (void)testGetFeatureVariableStringReturnsDefaultVariableValueWithTypedAudiences {
     NSString *featureKey = @"feat_with_var";
     NSString *variableKey = @"x";
     NSString *userId = @"user1";
@@ -1389,7 +1477,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     
     NSDictionary<NSString *, NSObject *> *userAttributes = @{
                                                                  @"house": @"Gryffindor",
-                                                                 @"should_do_it": @true
+                                                                 @"should_do_it": @YES
                                                                  };
     NSDictionary<NSString *, NSObject *> *expectedAttributes1 = @{
                                                                   @"shouldIndex": @1,
@@ -1401,7 +1489,7 @@ static NSString * const kAttributeKeyBrowserIsDefault = @"browser_is_default";
     NSDictionary<NSString *, NSObject *> *expectedAttributes2 = @{
                                                                   @"shouldIndex": @1,
                                                                   @"type": @"custom",
-                                                                  @"value": @true,
+                                                                  @"value": @YES,
                                                                   @"entity_id": @"594017",
                                                                   @"key": @"should_do_it"
                                                                   };
