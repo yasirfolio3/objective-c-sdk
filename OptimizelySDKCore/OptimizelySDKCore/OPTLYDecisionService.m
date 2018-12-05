@@ -484,30 +484,41 @@
     if (attributes == nil) {
         attributes = @{};
     }
+    [config.logger logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationStarted withLevel:OptimizelyLogLevelInfo];
     
     // if there are audience conditions, evaluate them, else evaluate audience Ids
     if (experiment.audienceConditions != nil) {
+        [config.logger logMessage:OPTLYLoggerMessagesDecisionServiceAudienceConditionsEvaluated withLevel:OptimizelyLogLevelInfo];
+        if (experiment.audienceConditions.count == 0) {
+            return true;
+        }
         BOOL areAttributesValid = [[experiment evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
         if (areAttributesValid) {
+            [config.logger logMessage: areAttributesValid ? OPTLYLoggerMessagesDecisionServiceAudienceEvaluationSuccess : OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure withLevel:OptimizelyLogLevelInfo];
             return areAttributesValid;
         }
+        [config.logger logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure withLevel:OptimizelyLogLevelInfo];
         return false;
     }
     
-    NSArray *audiences = experiment.audienceIds;
+    NSArray *audienceIds = experiment.audienceIds;
     // if there are no audiences, ALL users should be part of the experiment
-    if ([audiences count] == 0) {
+    if ([audienceIds count] == 0) {
+        [config.logger logMessage:OPTLYLoggerMessagesDecisionServiceAudienceConditionsAndIdsNotFound withLevel:OptimizelyLogLevelInfo];
         return true;
     }
 
-    for (NSString *audienceId in audiences) {
+    [config.logger logMessage:OPTLYLoggerMessagesDecisionServiceAudienceIdsEvaluated withLevel:OptimizelyLogLevelInfo];
+    for (NSString *audienceId in audienceIds) {
         OPTLYAudience *audience = [config getAudienceForId:audienceId];
         BOOL areAttributesValid = [[audience evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
         if (areAttributesValid) {
+            [config.logger logMessage: OPTLYLoggerMessagesDecisionServiceAudienceEvaluationSuccess withLevel:OptimizelyLogLevelInfo];
             return true;
         }
     }
     
+    [config.logger logMessage: OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure withLevel:OptimizelyLogLevelInfo];
     return false;
 }
 @end

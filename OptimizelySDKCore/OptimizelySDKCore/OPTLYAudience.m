@@ -16,6 +16,7 @@
 
 #import "OPTLYAudience.h"
 #import "OPTLYDatafileKeys.h"
+#import "OPTLYNSObject+Validation.h"
 
 @implementation OPTLYAudience
 
@@ -27,17 +28,7 @@
 }
 
 - (void)setConditionsWithNSString:(NSString *)string {
-    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-    
-    NSError *err = nil;
-    NSArray *array = [NSJSONSerialization JSONObjectWithData:data
-                                                     options:NSJSONReadingAllowFragments
-                                                       error:&err];
-    if (err != nil) {
-        NSException *exception = [[NSException alloc] initWithName:err.domain reason:err.localizedFailureReason userInfo:@{@"Error" : err}];
-        @throw exception;
-    }
-    
+    NSArray *array = [string getValidConditionsArray];
     [self setConditionsWithNSArray:array];
 }
 

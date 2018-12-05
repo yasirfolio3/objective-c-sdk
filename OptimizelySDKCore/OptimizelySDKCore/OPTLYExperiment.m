@@ -17,6 +17,7 @@
 #import "OPTLYExperiment.h"
 #import "OPTLYDatafileKeys.h"
 #import "OPTLYVariation.h"
+#import "OPTLYNSObject+Validation.h"
 
 NSString * const OPTLYExperimentStatusRunning = @"Running";
 
@@ -40,17 +41,8 @@ NSString * const OPTLYExperimentStatusRunning = @"Running";
 }
 
 - (void)setAudienceConditionsWithNSString:(NSString *)string {
-    NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
-    
     NSError *err = nil;
-    NSArray *array = [NSJSONSerialization JSONObjectWithData:data
-                                                     options:NSJSONReadingAllowFragments
-                                                       error:&err];
-    if (err != nil) {
-        NSException *exception = [[NSException alloc] initWithName:err.domain reason:err.localizedFailureReason userInfo:@{@"Error" : err}];
-        @throw exception;
-    }
-    
+    NSArray *array = [string getValidAudienceConditionsArray];
     self.audienceConditions = [OPTLYCondition deserializeAudienceConditionsJSONArray:array error:&err];
     
     if (err != nil) {

@@ -245,6 +245,11 @@
         "conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
     },
     {
+        "id": "3468206645",
+        "name": "$$dummyMultipleCustomAttrs",
+        "conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
+    },
+    {
         "id": "0",
         "name": "$$dummy",
         "conditions": "{\"type\": \"custom_attribute\", \"name\": \"$opt_dummy_attribute\", \"value\": \"impossible_value\"}"
@@ -279,6 +284,11 @@
         "id": "3468206643",
         "name": "exactBoolean",
         "conditions": ["and", ["or", ["or", {"name": "should_do_it", "type": "custom_attribute", "match":"exact", "value": true}]]]
+    },
+    {
+        "id": "3468206645",
+        "name": "multiple_custom_attrs",
+        "conditions": ["and", ["or", ["or", {"name": "browser", "type": "custom_attribute", "value": "chrome"}, {"name": "browser", "type": "custom_attribute", "value": "firefox"}]]]
     }
     ],
     "groups": [],

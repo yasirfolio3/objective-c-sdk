@@ -62,6 +62,20 @@ NS_ASSUME_NONNULL_BEGIN
  **/
 - (BOOL)isBool;
 
+/**
+ * Determines if object is a valid audience conditions array type.
+ *
+ * @returns A NSArray of audience conditions if valid, else return nil.
+ **/
+- (nullable NSArray *)getValidAudienceConditionsArray;
+
+/**
+ * Determines if object is a valid conditions array type.
+ *
+ * @returns A NSArray of conditions if valid, else return nil.
+ **/
+- (nullable NSArray *)getValidConditionsArray;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -24,6 +24,7 @@
 #import "OPTLYTestHelper.h"
 #import "OPTLYErrorHandler.h"
 #import "OPTLYLogger.h"
+#import "OPTLYNSObject+Validation.h"
 
 @interface OPTLYConditionTest : XCTestCase
 
@@ -464,10 +465,7 @@
 
 - (void)testDeserializeConditions {
     NSString *conditionString = @"[\"and\", [\"or\", [\"or\", {\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\": \"chrome\"}]]]";
-    NSData *conditionData = [conditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [conditionString getValidConditionsArray];
     NSArray *conditionsArray = [OPTLYCondition deserializeJSONArray:conditionStringJSONArray];
     XCTAssertNotNil(conditionsArray);
     XCTAssertTrue([conditionsArray[0] isKindOfClass:[OPTLYAndCondition class]]);
@@ -488,10 +486,7 @@
 
 - (void)testDeserializeConditionsNoValue {
     NSString *conditionString = @"[\"and\", [\"or\", [\"or\", {\"name\": \"browser_type\", \"invalid\": \"custom_attribute\"}]]]";
-    NSData *conditionData = [conditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [conditionString getValidConditionsArray];
     NSError *error = nil;
     NSArray *conditionsArray = [OPTLYCondition deserializeJSONArray:conditionStringJSONArray error:&error];
     XCTAssertNil(conditionsArray);
@@ -499,10 +494,7 @@
 
 - (void)testDeserializeConditionsEmptyConditions {
     NSString *conditionString = @"";
-    NSData *conditionData = [conditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [conditionString getValidConditionsArray];
     NSError *error = nil;
     NSArray *conditionsArray = [OPTLYCondition deserializeJSONArray:conditionStringJSONArray error:&error];
     XCTAssertNil(conditionsArray);
@@ -548,10 +540,7 @@
 
 - (void)testDeserializeComplexConditions {
     NSString *conditionString = @"[\"and\", [\"or\", [\"or\",\"1\",\"2\"]]]";
-    NSData *conditionData = [conditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [conditionString getValidAudienceConditionsArray];
     NSArray *conditionsArray = [OPTLYCondition deserializeAudienceConditionsJSONArray:conditionStringJSONArray];
     XCTAssertNotNil(conditionsArray);
     XCTAssertTrue([conditionsArray[0] isKindOfClass:[OPTLYAndCondition class]]);
@@ -572,10 +561,7 @@
 
 - (void)testDeserializeComplexConditionsEmptyConditions {
     NSString *conditionString = @"";
-    NSData *conditionData = [conditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [conditionString getValidAudienceConditionsArray];
     NSError *error = nil;
     NSArray *conditionsArray = [OPTLYCondition deserializeAudienceConditionsJSONArray:conditionStringJSONArray error:&error];
     XCTAssertNil(conditionsArray);
@@ -587,16 +573,23 @@
     XCTAssertNil(conditionsArray);
 }
 
+- (void)testDeserializeComplexConditionsWithAudienceLeafNodeString {
+    NSString *conditionString = @"2";
+    NSArray *conditionStringJSONArray = [conditionString getValidAudienceConditionsArray];
+    NSError *error = nil;
+    NSArray *conditionsArray = [OPTLYCondition deserializeAudienceConditionsJSONArray:conditionStringJSONArray error:&error];
+    XCTAssertNotNil(conditionsArray);
+    XCTAssertTrue([conditionsArray[0] isKindOfClass:[OPTLYOrCondition class]]);
+    OPTLYOrCondition *orCondition = conditionsArray[0];
+    XCTAssertTrue([orCondition.subConditions[0] isKindOfClass:[OPTLYAudienceBaseCondition class]]);
+}
 
 // MARK:- Implicit Operator Tests
 
 - (void)testShouldReturnOrOperatorWhenNoOperatorIsProvided {
     
     NSString *noOperatorConditionString = @"[{\"name\": \"browser_type\", \"type\": \"custom_attribute\", \"value\": \"android\"}]";
-    NSData *conditionData = [noOperatorConditionString dataUsingEncoding:NSUTF8StringEncoding];
-    NSArray *conditionStringJSONArray = [NSJSONSerialization JSONObjectWithData:conditionData
-                                                                        options:NSJSONReadingAllowFragments
-                                                                          error:nil];
+    NSArray *conditionStringJSONArray = [noOperatorConditionString getValidConditionsArray];
     NSError *error = nil;
     NSArray *conditionsArray = [OPTLYCondition deserializeJSONArray:conditionStringJSONArray error:&error];
     XCTAssertNotNil(conditionsArray);

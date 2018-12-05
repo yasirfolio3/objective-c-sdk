@@ -31,6 +31,7 @@
 #import "OPTLYRollout.h"
 #import "OPTLYFeatureDecision.h"
 #import "OPTLYControlAttributes.h"
+#import "OPTLYLogger.h"
 
 static NSString * const kDatafileName = @"test_data_10_experiments";
 static NSString * const kUserId = @"6369992312";
@@ -180,7 +181,7 @@ static NSString * const kFeatureFlagNoBucketedRuleRolloutKey = @"booleanSingleVa
                                                   attributes:badAttributes];
     NSAssert(isValid == false, @"Experiment running with user in experiment, but with bad attributes should fail validation.");
 }
-    
+
 - (void)testValidatePreconditionsAllowsWhiteListedUserToOverrideAudienceEvaluation {
     NSData *whitelistingDatafile = [OPTLYTestHelper loadJSONDatafileIntoDataObject:kWhitelistingTestDatafileName];
     Optimizely *optimizely = [[Optimizely alloc] initWithBuilder:[OPTLYBuilder builderWithBlock:^(OPTLYBuilder * _Nullable builder) {
@@ -199,6 +200,137 @@ static NSString * const kFeatureFlagNoBucketedRuleRolloutKey = @"booleanSingleVa
                            attributes:self.attributes];
     XCTAssertNotNil(variation);
     XCTAssertEqualObjects(variation.variationKey, kWhitelistedVariation);
+}
+
+- (void)testUserInExperimentWithEmptyAudienceIdAndConditions
+{
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceIds = @[];
+    experiment.audienceConditions = (NSArray<OPTLYCondition> *)@[];
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testUserInExperimentWithValidAudienceIdAndEmptyAudienceConditions
+{
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = (NSArray<OPTLYCondition> *)@[];
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testUserInExperimentWithEmptyAudienceIdAndNilAudienceConditions
+{
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceIds = @[];
+    experiment.audienceConditions = nil;
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testIsUserInExperimentUsesNonNullAudienceConditionsWhenAudienceIdsAlsoAvailable
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = (NSArray<OPTLYCondition> *)@[];
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceConditionsEvaluated withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testIsUserInExperimentUsesNonNullAudienceIdsWhenAudienceConditionsNull
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = nil;
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceIdsEvaluated withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testIsUserInExperimentReturnsTrueWhenBothAudienceConditionsAndAudienceIdsNull
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = nil;
+    experiment.audienceIds = @[];
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceConditionsAndIdsNotFound withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+    XCTAssertTrue(isValid);
+}
+
+- (void)testIsUserInExperimentEvaluatesAudienceWhenAttributesEmpty
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:@{}];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationStarted withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+}
+
+- (void)testIsUserInExperimentEvaluatesAudienceWhenAttributesNil
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:nil];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationStarted withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+}
+
+- (void)testIsUserInExperimentReturnsFalseWhenEvaluatorReturnsNoneOrFalse
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = nil;
+    experiment.audienceIds = @[@"1"];
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+    XCTAssertFalse(isValid);
+}
+
+- (void)testIsUserInExperimentReturnsTrueWhenEvaluatorReturnsTrue
+{
+    id loggerMock = OCMPartialMock((OPTLYLoggerDefault *)self.optimizely.logger);
+    OPTLYExperiment *experiment = [self.config getExperimentForKey:kExperimentWithAudienceKey];
+    experiment.audienceConditions = nil;
+    BOOL isValid = [self.decisionService userPassesTargeting:self.config
+                                                  experiment:experiment
+                                                      userId:kUserId
+                                                  attributes:self.attributes];
+    OCMVerify([loggerMock logMessage:OPTLYLoggerMessagesDecisionServiceAudienceEvaluationSuccess withLevel:OptimizelyLogLevelInfo]);
+    [loggerMock stopMocking];
+    XCTAssertTrue(isValid);
 }
 
 #pragma mark - getVariation
