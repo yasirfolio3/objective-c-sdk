@@ -233,12 +233,6 @@ extern NSString *const OPTLYLoggerMessagesDecisionServiceSavedVariationParseErro
 extern NSString *const OPTLYLoggerMessagesDecisionServiceGetVariationParseError;
 extern NSString *const OPTLYLoggerMessagesDecisionServiceReplaceBucketEntity;
 extern NSString *const OPTLYLoggerMessagesDecisionServiceSettingTheBucketingID;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationSuccess;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationStarted;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceIdsEvaluated;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceConditionsEvaluated;
-extern NSString *const OPTLYLoggerMessagesDecisionServiceAudienceConditionsAndIdsNotFound;
 // FF = Feature Flag
 extern NSString *const OPTLYLoggerMessagesDecisionServiceFFNotUsed;
 extern NSString *const OPTLYLoggerMessagesDecisionServiceFFUserBucketed;

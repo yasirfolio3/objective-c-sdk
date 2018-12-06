@@ -164,7 +164,7 @@
     XCTAssertFalse([[notCondition evaluateConditionsWithAttributes:userAttributes projectConfig:self.optimizelyTypedAudience.config] boolValue]);
 }
 
-- (void)testAndConditionReturnsTrueWhenComplexAudienceConditionsReturnsFalse {
+- (void)testNotConditionReturnsTrueWhenComplexAudienceConditionsReturnsFalse {
     NSDictionary<NSString *, NSObject *> *userAttributes = @{
                                                              @"house": @"Gryffindor"
                                                              };
@@ -298,7 +298,6 @@
     OPTLYOrCondition *orCondition = (OPTLYOrCondition *)[conditions firstObject];
     XCTAssertFalse([[orCondition evaluateConditionsWithAttributes:userAttributes projectConfig:self.optimizelyTypedAudience.config] boolValue]);
 }
-
 
 // MARK:- AND Condition Tests
 

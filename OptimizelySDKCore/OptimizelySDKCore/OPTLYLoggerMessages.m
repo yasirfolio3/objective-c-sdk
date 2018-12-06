@@ -241,12 +241,6 @@ NSString *const OPTLYLoggerMessagesDecisionServiceUserNotBucketed = @"[DECISION 
 NSString *const OPTLYLoggerMessagesDecisionServiceUserInVariation = @"[DECISION SERVICE] User %@ is in variation %@ of experiment %@.";
 NSString *const OPTLYLoggerMessagesDecisionServiceGroupIdNotFound = @"[PROJECT CONFIG] Group Id not found.";
 NSString *const OPTLYLoggerMessagesDecisionServiceGroupUnknownForGroupId = @"[PROJECT CONFIG] Group not found for group ID: %@.";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationSuccess = @"[DECISION SERVICE] Successfully Evaluated";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationFailure = @"[DECISION SERVICE] Evaluation Failed.";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceEvaluationStarted = @"[DECISION SERVICE] Evaluation Started.";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceIdsEvaluated = @"[DECISION SERVICE] Evaluating with Audience Ids.";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceConditionsEvaluated = @"[DECISION SERVICE] Evaluating with Audience Conditions.";
-NSString *const OPTLYLoggerMessagesDecisionServiceAudienceConditionsAndIdsNotFound = @"[DECISION SERVICE] No Audience Ids and Conditions found";
 
 // ---- HTTP Request Manager ----
 // Debug (not through logger handler)
