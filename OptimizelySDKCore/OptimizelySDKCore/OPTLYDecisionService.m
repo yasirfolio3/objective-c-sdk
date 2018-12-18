@@ -477,6 +477,9 @@
                                          config:(OPTLYProjectConfig *)config
                                      attributes:(NSDictionary<NSString *, NSObject *> *)attributes
 {
+    NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedForExperiment, experiment.experimentKey, experiment.experimentKey];
+    [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+    
     if (experiment.audienceConditions.count == 0) {
         return true;
     }

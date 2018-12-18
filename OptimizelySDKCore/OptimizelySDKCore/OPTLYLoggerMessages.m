@@ -249,6 +249,20 @@ NSString *const OPTLYHTTPRequestManagerGETIfModifiedSince = @"[HTTP] GET if modi
 NSString *const OPTLYHTTPRequestManagerPOSTWithParameters = @"[HTTP] POST attempt: %lu";
 NSString *const OPTLYHTTPRequestManagerBackoffRetryStates = @"[HTTP] Retry attempt: %d exponentialMultiplier: %u delay_ns: %lu, delayTime: %lu";
 
+// ---- Audience Evaluator ----
+// info
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationCompletedWithResult = @"[AUDIENCE EVALUATOR] Audience %@ evaluated as: %@";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorExperimentEvaluationCompletedWithResult = @"[AUDIENCE EVALUATOR] Audiences for experiment %@ collectively evaluated as %@";
+// warning
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknown = @"[AUDIENCE EVALUATOR] Audience condition %@ evaluated as UNKNOWN because the value for user attribute %@ is inapplicable: %@";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute = @"[AUDIENCE EVALUATOR] Audience condition %@ evaluated as UNKNOWN because no value was passed for user attribute %@";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorUnknownMatchType = @"[AUDIENCE EVALUATOR] Audience condition %@ uses an unknown match type";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionType = @"[AUDIENCE EVALUATOR] Audience condition %@ has an unknown condition type";
+// debug
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedWithConditions = @"[AUDIENCE EVALUATOR] Starting to evaluate audience %@ with conditions: %@";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedForExperiment = @"[AUDIENCE EVALUATOR] Evaluating audiences for experiment %@: %@";
+NSString *const OPTLYLoggerMessagesAudienceEvaluatorUserAttributes = @"[AUDIENCE EVALUATOR] User attributes: %@";
+
 @implementation OPTLYLoggerMessages
 
 @end

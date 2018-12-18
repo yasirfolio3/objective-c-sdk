@@ -255,6 +255,20 @@ extern NSString *const OPTLYHTTPRequestManagerGETIfModifiedSince;
 extern NSString *const OPTLYHTTPRequestManagerPOSTWithParameters;
 extern NSString *const OPTLYHTTPRequestManagerBackoffRetryStates;
 
+// ---- Audience Evaluator ----
+// info
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationCompletedWithResult;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorExperimentEvaluationCompletedWithResult;
+// warning
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknown;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorUnknownMatchType;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionType;
+// debug
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedWithConditions;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedForExperiment;
+extern NSString *const OPTLYLoggerMessagesAudienceEvaluatorUserAttributes;
+
 @interface OPTLYLoggerMessages : NSObject
 
 @end
