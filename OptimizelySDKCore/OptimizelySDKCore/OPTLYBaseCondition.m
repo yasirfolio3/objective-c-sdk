@@ -17,6 +17,8 @@
 #import "OPTLYBaseCondition.h"
 #import "OPTLYDatafileKeys.h"
 #import "OPTLYNSObject+Validation.h"
+#import "OPTLYLoggerMessages.h"
+#import "OPTLYLogger.h"
 
 @implementation OPTLYBaseCondition
 
@@ -47,7 +49,7 @@
     }
 }
 
--(nullable NSNumber *)evaluateMatchTypeExact:(NSDictionary<NSString *, NSObject *> *)attributes{
+-(nullable NSNumber *)evaluateMatchTypeExact:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value that is of similar class type to our value and also equals to our value, else return Null
     NSObject *userAttribute = [attributes objectForKey:self.name];
     NSNumber *success = NULL;
@@ -64,15 +66,26 @@
     else if ([self.value isBool] && [userAttribute isBool]) {
         success = [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
     }
+    else {
+        if (userAttribute) {
+            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute ? userAttribute : @"nil"];
+            [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        }
+        else {
+            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+            [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        }
+        
+    }
     return success;
 }
 
--(nullable NSNumber *)evaluateMatchTypeExist:(NSDictionary<NSString *, NSObject *> *)attributes{
+-(nullable NSNumber *)evaluateMatchTypeExist:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain our name as a key to a Non nullable object
     return [NSNumber numberWithBool:([attributes objectForKey:self.name] && ![attributes[self.name] isKindOfClass:[NSNull class]])];
 }
 
--(nullable NSNumber *)evaluateMatchTypeSubstring:(NSDictionary<NSString *, NSObject *> *)attributes{
+-(nullable NSNumber *)evaluateMatchTypeSubstring:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain our value as substring
     NSObject *userAttribute = [attributes objectForKey:self.name];
     BOOL userAndOurValueHaveStringClassTypes = ([self.value isKindOfClass: [NSString class]] && [userAttribute isKindOfClass: [NSString class]]);
@@ -84,7 +97,7 @@
     return NULL;
 }
 
--(nullable NSNumber *)evaluateMatchTypeGreaterThan:(NSDictionary<NSString *, NSObject *> *)attributes{
+-(nullable NSNumber *)evaluateMatchTypeGreaterThan:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value greater than our value
     NSObject *userAttribute = [attributes objectForKey:self.name];
     BOOL userValueAndOurValueHaveNSNumberClassTypes = [self.value isNumeric] && [userAttribute isNumeric];
@@ -97,7 +110,7 @@
     return NULL;
 }
 
--(nullable NSNumber *)evaluateMatchTypeLessThan:(NSDictionary<NSString *, NSObject *> *)attributes{
+-(nullable NSNumber *)evaluateMatchTypeLessThan:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value lesser than our value
     NSObject *userAttribute = [attributes objectForKey:self.name];
     BOOL userValueAndOurValueHaveNSNumberClassTypes = [self.value isNumeric] && [userAttribute isNumeric];
@@ -110,10 +123,12 @@
     return NULL;
 }
 
--(nullable NSNumber *)evaluateCustomMatchType:(NSDictionary<NSString *, NSObject *> *)attributes {
+-(nullable NSNumber *)evaluateCustomMatchType:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     
     if (![self.type isEqual:OPTLYDatafileKeysCustomAttributeConditionType]){
         //Check if given type is the required type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionType, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
         return NULL;
     }
     else if (!self.match || [self.match isEqualToString:@""]){
@@ -122,26 +137,30 @@
     }
     else if (self.value == NULL && ![self.match isEqualToString:OPTLYDatafileKeysMatchTypeExists]){
         //Check if given value is null, which is only acceptable if match type is Exists
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
         return NULL;
     }
     
     SWITCH(self.match){
         CASE(OPTLYDatafileKeysMatchTypeExact) {
-            return [self evaluateMatchTypeExact: attributes];
+            return [self evaluateMatchTypeExact: attributes projectConfig:config];
         }
         CASE(OPTLYDatafileKeysMatchTypeExists) {
-            return [self evaluateMatchTypeExist: attributes];
+            return [self evaluateMatchTypeExist: attributes projectConfig:config];
         }
         CASE(OPTLYDatafileKeysMatchTypeSubstring) {
-            return [self evaluateMatchTypeSubstring: attributes];
+            return [self evaluateMatchTypeSubstring: attributes projectConfig:config];
         }
         CASE(OPTLYDatafileKeysMatchTypeGreaterThan) {
-            return [self evaluateMatchTypeGreaterThan: attributes];
+            return [self evaluateMatchTypeGreaterThan: attributes projectConfig:config];
         }
         CASE(OPTLYDatafileKeysMatchTypeLessThan) {
-            return [self evaluateMatchTypeLessThan: attributes];
+            return [self evaluateMatchTypeLessThan: attributes projectConfig:config];
         }
         DEFAULT {
+            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownMatchType, [self toJSONString]];
+            [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
             return NULL;
         }
     }
@@ -152,7 +171,7 @@
  */
 - (nullable NSNumber *)evaluateConditionsWithAttributes:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
     // check user attribute value for the condition and match type against our condition value
-    return [self evaluateCustomMatchType: attributes];
+    return [self evaluateCustomMatchType: attributes projectConfig:config];
 }
 
 @end

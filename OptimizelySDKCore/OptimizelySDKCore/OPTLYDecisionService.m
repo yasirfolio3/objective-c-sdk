@@ -465,6 +465,15 @@
     }
     
     for (NSString *audienceId in audienceIds) {
+        // Log Audience Evaluation Started
+        OPTLYAudience *audience = [config getAudienceForId:audienceId];
+        NSString *conditionString = audienceId ? [audience getConditionsJSONString] : @"";
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedWithConditions, audience.audienceName, conditionString];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+        // Log User Attributes
+        logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUserAttributes, [attributes getJSONDictionaryStringOrEmpty]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+
         BOOL areAttributesValid = [[self evaluateAudienceWithId:audienceId config:config attributes:attributes] boolValue];
         if (areAttributesValid) {
             return true;
@@ -477,13 +486,21 @@
                                          config:(OPTLYProjectConfig *)config
                                      attributes:(NSDictionary<NSString *, NSObject *> *)attributes
 {
-    NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedForExperiment, experiment.experimentKey, experiment.experimentKey];
-    [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
-    
     if (experiment.audienceConditions.count == 0) {
         return true;
     }
+    
+    // Log Experiment Evaluation Started
+    NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorEvaluationStartedForExperiment, experiment.experimentKey, [experiment getAudienceConditionsJSONString]];
+    [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+    // Log User Attributes
+    logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUserAttributes, [attributes getJSONDictionaryStringOrEmpty]];
+    [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+    
     BOOL areAttributesValid = [[experiment evaluateConditionsWithAttributes:attributes projectConfig:config] boolValue];
+    // Log Evaluation Result
+    logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorExperimentEvaluationCompletedWithResult, experiment.experimentKey, areAttributesValid ? @"TRUE" : @"FALSE"];
+    [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelInfo];
     if (areAttributesValid) {
         return areAttributesValid;
     }
