@@ -63,6 +63,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getJSONDictionaryStringOrEmpty;
 
 /**
+ * Returns if object is of exact match type
+ *
+ * @returns A bool for whether object is valid exact match type.
+ **/
+- (BOOL)isValidExactMatchTypeValue;
+
+/**
+ * Returns if object is of GT or LT match type
+ *
+ * @returns A bool for whether object is valid GT or LT match type.
+ **/
+- (BOOL)isValidGTLTMatchTypeValue;
+
+/**
  * Returns if object is of numeric type
  *
  * @returns A bool for whether object is valid numeric type.

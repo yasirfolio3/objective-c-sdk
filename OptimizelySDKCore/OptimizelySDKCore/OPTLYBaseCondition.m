@@ -51,33 +51,47 @@
 
 -(nullable NSNumber *)evaluateMatchTypeExact:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value that is of similar class type to our value and also equals to our value, else return Null
+    
+    // check if condition value is invalid
+    if (![self.value isValidExactMatchTypeValue]) {
+        // Log Invalid Condition Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelError];
+        return NULL;
+    }
+    // check if attribute value is invalid
     NSObject *userAttribute = [attributes objectForKey:self.name];
-    NSNumber *success = NULL;
+    if (![userAttribute isValidExactMatchTypeValue]) {
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute ? userAttribute : @"null"];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        return NULL;
+    }
     
     if ([self.value isKindOfClass:[NSString class]] && [userAttribute isKindOfClass:[NSString class]]) {
-        success = [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
+        return [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
     }
     else if ([self.value isNumeric] && [userAttribute isNumeric]) {
-        success = [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
+        return [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
     }
     else if ([self.value isKindOfClass:[NSNull class]] && [userAttribute isKindOfClass:[NSNull class]]) {
-        success = [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
+        return [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
     }
     else if ([self.value isBool] && [userAttribute isBool]) {
-        success = [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
+        return [NSNumber numberWithBool:[self.value isEqual:userAttribute]];
     }
     else {
-        if (userAttribute) {
-            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute ? userAttribute : @"nil"];
-            [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        if (![attributes.allKeys containsObject:self.name]) {
+            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+            [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
         }
         else {
-            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+            NSString *userAttributeClassName = NSStringFromClass([userAttribute class]);
+            NSString *conditionValueClassName = NSStringFromClass([self.value class]);
+            NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMismatchType, [self toJSONString], self.name, userAttribute ? userAttributeClassName : @"null", self.value ? conditionValueClassName : @"null"];
             [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
         }
-        
     }
-    return success;
+    return NULL;
 }
 
 -(nullable NSNumber *)evaluateMatchTypeExist:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
@@ -87,40 +101,88 @@
 
 -(nullable NSNumber *)evaluateMatchTypeSubstring:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain our value as substring
-    NSObject *userAttribute = [attributes objectForKey:self.name];
-    BOOL userAndOurValueHaveStringClassTypes = ([self.value isKindOfClass: [NSString class]] && [userAttribute isKindOfClass: [NSString class]]);
     
-    if (userAndOurValueHaveStringClassTypes) {
-        BOOL containsSubstring = [((NSString *)userAttribute) containsString: (NSString *)self.value];
-        return [NSNumber numberWithBool:containsSubstring];
+    // check if condition value is invalid
+    if (self.value == nil || [self.value isKindOfClass:[NSNull class]] || ![self.value isKindOfClass: [NSString class]]) {
+        // Log Invalid Condition Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelError];
+        return NULL;
     }
-    return NULL;
+    // check if user attributes are invalid
+    NSObject *userAttribute = [attributes objectForKey:self.name];
+    if (!userAttribute) {
+        // Log Missing Attribute
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+        return NULL;
+    }
+    if (![userAttribute isKindOfClass: [NSString class]]) {
+        // Log Invalid Attribute Value Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        return NULL;
+    }
+    BOOL containsSubstring = [((NSString *)userAttribute) containsString: (NSString *)self.value];
+    return [NSNumber numberWithBool:containsSubstring];
 }
 
 -(nullable NSNumber *)evaluateMatchTypeGreaterThan:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value greater than our value
-    NSObject *userAttribute = [attributes objectForKey:self.name];
-    BOOL userValueAndOurValueHaveNSNumberClassTypes = [self.value isNumeric] && [userAttribute isNumeric];
     
-    if (userValueAndOurValueHaveNSNumberClassTypes) {
-        NSNumber *ourValue = (NSNumber *)self.value;
-        NSNumber *userValue = (NSNumber *)userAttribute;
-        return [NSNumber numberWithBool: ([userValue doubleValue] > [ourValue doubleValue])];
+    // check if condition value is invalid
+    if (self.value == nil || [self.value isKindOfClass:[NSNull class]] || ![self.value isNumeric]) {
+        // Log Invalid Condition Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelError];
+        return NULL;
     }
-    return NULL;
+    // check if user attributes are invalid
+    NSObject *userAttribute = [attributes objectForKey:self.name];
+    if (!userAttribute) {
+        // Log Missing Attribute
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+        return NULL;
+    }
+    if (![userAttribute isNumeric]) {
+        // Log Invalid Attribute Value Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        return NULL;
+    }
+    NSNumber *ourValue = (NSNumber *)self.value;
+    NSNumber *userValue = (NSNumber *)userAttribute;
+    return [NSNumber numberWithBool: ([userValue doubleValue] > [ourValue doubleValue])];
 }
 
 -(nullable NSNumber *)evaluateMatchTypeLessThan:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config{
     // check if user attributes contain a value lesser than our value
-    NSObject *userAttribute = [attributes objectForKey:self.name];
-    BOOL userValueAndOurValueHaveNSNumberClassTypes = [self.value isNumeric] && [userAttribute isNumeric];
     
-    if (userValueAndOurValueHaveNSNumberClassTypes) {
-        NSNumber *ourValue = (NSNumber *)self.value;
-        NSNumber *userValue = (NSNumber *)userAttribute;
-        return [NSNumber numberWithBool: ([userValue doubleValue] < [ourValue doubleValue])];
+    // check if condition value is invalid
+    if (![self.value isValidGTLTMatchTypeValue]) {
+        // Log Invalid Condition Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelError];
+        return NULL;
     }
-    return NULL;
+    // check if user attributes are invalid
+    NSObject *userAttribute = [attributes objectForKey:self.name];
+    if (!userAttribute) {
+        // Log Missing Attribute
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForMissingAttribute, [self toJSONString], self.name];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelDebug];
+        return NULL;
+    }
+    if (![userAttribute isNumeric]) {
+        // Log Invalid Attribute Value Type
+        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorConditionEvaluatedAsUnknownForInvalidValue, [self toJSONString], self.name, userAttribute];
+        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
+        return NULL;
+    }
+    NSNumber *ourValue = (NSNumber *)self.value;
+    NSNumber *userValue = (NSNumber *)userAttribute;
+    return [NSNumber numberWithBool: ([userValue doubleValue] < [ourValue doubleValue])];
 }
 
 -(nullable NSNumber *)evaluateCustomMatchType:(NSDictionary<NSString *, NSObject *> *)attributes projectConfig:(nullable OPTLYProjectConfig *)config {
@@ -134,12 +196,6 @@
     else if (!self.match || [self.match isEqualToString:@""]){
         //Check if given match is empty, if so, opt for legacy Exact Matching
         self.match = OPTLYDatafileKeysMatchTypeExact;
-    }
-    else if (self.value == NULL && ![self.match isEqualToString:OPTLYDatafileKeysMatchTypeExists]){
-        //Check if given value is null, which is only acceptable if match type is Exists
-        NSString *logMessage = [NSString stringWithFormat:OPTLYLoggerMessagesAudienceEvaluatorUnknownConditionValue, [self toJSONString]];
-        [config.logger logMessage:logMessage withLevel:OptimizelyLogLevelWarning];
-        return NULL;
     }
     
     SWITCH(self.match){
